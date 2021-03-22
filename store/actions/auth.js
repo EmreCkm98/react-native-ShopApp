@@ -1,5 +1,7 @@
 import AsyncStorage from "@react-native-community/async-storage";
 
+import ENV from '../../env';
+
 export const AUTHENTICATE = "AUTHENTICATE";
 export const LOGOUT = "LOGOUT";
 
@@ -19,7 +21,7 @@ export const authenticate = (userId, token, expiryTime) => {
 export const signup = (email, password) => {
   return async (dispatch) => {
     const response = await fetch(
-      "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyA5voqWmvNmFiXG-_-Pbpu4TXbtU-dGkJg",
+      `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${ENV.firebaseApiKey}`,
       {
         method: "POST",
         headers: {
@@ -62,7 +64,7 @@ export const signup = (email, password) => {
 export const login = (email, password) => {
   return async (dispatch) => {
     const response = await fetch(
-      "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyA5voqWmvNmFiXG-_-Pbpu4TXbtU-dGkJg",
+      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${ENV.firebaseApiKey}`,
       {
         method: "POST",
         headers: {
