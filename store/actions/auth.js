@@ -4,8 +4,15 @@ import ENV from '../../env';
 
 export const AUTHENTICATE = "AUTHENTICATE";
 export const LOGOUT = "LOGOUT";
+export const SET_DID__TRY_AL="SET_DID__TRY_AL";
 
 let timer;
+
+export const setDidTryAL=()=>{
+  return{
+    type:SET_DID__TRY_AL
+  };
+};
 
 export const authenticate = (userId, token, expiryTime) => {
   return (dispatch) => {
