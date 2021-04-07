@@ -1,12 +1,15 @@
 import Product from "../../models/product";
+import * as Notifications from 'expo-notifications';
+import * as Permissions from 'expo-permissions';
 
-export const DELETE_PRODUCT = "DELETE_PRODUCT";
-export const CREATE_PRODUCT = "CREATE_PRODUCT";
-export const UPDATE_PRODUCT = "UPDATE_PRODUCT";
-export const SET_PRODUCTS = "SET_PRODUCTS";
+export const DELETE_PRODUCT = 'DELETE_PRODUCT';
+export const CREATE_PRODUCT = 'CREATE_PRODUCT';
+export const UPDATE_PRODUCT = 'UPDATE_PRODUCT';
+export const SET_PRODUCTS = 'SET_PRODUCTS';
 
 export const fetchProducts = () => {
   return async (dispatch, getState) => {
+    // any async code you want!
     const userId = getState().auth.userId;
     try {
       const response = await fetch(
@@ -14,7 +17,7 @@ export const fetchProducts = () => {
       );
 
       if (!response.ok) {
-        throw new Error("Something went wrong!");
+        throw new Error('Something went wrong!');
       }
 
       const resData = await response.json();
@@ -25,6 +28,7 @@ export const fetchProducts = () => {
           new Product(
             key,
             resData[key].ownerId,
+            resData[key].ownerPushToken,
             resData[key].title,
             resData[key].imageUrl,
             resData[key].description,
@@ -32,13 +36,14 @@ export const fetchProducts = () => {
           )
         );
       }
+
       dispatch({
         type: SET_PRODUCTS,
         products: loadedProducts,
         userProducts: loadedProducts.filter((prod) => prod.ownerId === userId),
       });
-    } catch (error) {
-      throw error;
+    } catch (err) {
+      throw err;
     }
   };
 };
@@ -54,26 +59,33 @@ export const deleteProduct = (productId) => {
     );
 
     if (!response.ok) {
-      throw new Error("Something went wrong!");
+      throw new Error('Something went wrong!');
     }
-
-    dispatch({
-      type: DELETE_PRODUCT,
-      pid: productId,
-    });
+    dispatch({ type: DELETE_PRODUCT, pid: productId });
   };
 };
 
 export const createProduct = (title, description, imageUrl, price) => {
   return async (dispatch, getState) => {
+    // any async code you want!
+    let pushToken;
+    let statusObj = await Permissions.getAsync(Permissions.NOTIFICATIONS);
+    if (statusObj.status !== 'granted') {
+      statusObj = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+    }
+    if (statusObj.status !== 'granted') {
+      pushToken = null;
+    } else {
+      pushToken = (await Notifications.getExpoPushTokenAsync()).data;
+    }
     const token = getState().auth.token;
     const userId = getState().auth.userId;
     const response = await fetch(
       `https://rn-shoppingapp-8b23a-default-rtdb.europe-west1.firebasedatabase.app/products.json?auth=${token}`,
       {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           title,
@@ -81,6 +93,7 @@ export const createProduct = (title, description, imageUrl, price) => {
           imageUrl,
           price,
           ownerId: userId,
+          ownerPushToken: pushToken,
         }),
       }
     );
@@ -96,6 +109,7 @@ export const createProduct = (title, description, imageUrl, price) => {
         imageUrl,
         price,
         ownerId: userId,
+        pushToken: pushToken,
       },
     });
   };
@@ -107,9 +121,9 @@ export const updateProduct = (id, title, description, imageUrl) => {
     const response = await fetch(
       `https://rn-shoppingapp-8b23a-default-rtdb.europe-west1.firebasedatabase.app/products/${id}.json?auth=${token}`,
       {
-        method: "PATCH",
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           title,
@@ -120,7 +134,7 @@ export const updateProduct = (id, title, description, imageUrl) => {
     );
 
     if (!response.ok) {
-      throw new Error("Something went wrong!");
+      throw new Error('Something went wrong!');
     }
 
     dispatch({

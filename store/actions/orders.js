@@ -12,7 +12,7 @@ export const fetchOrders = () => {
       );
 
       if (!response.ok) {
-        throw new Error("Something went wrong!");
+        throw new Error('Something went wrong!');
       }
 
       const resData = await response.json();
@@ -28,10 +28,7 @@ export const fetchOrders = () => {
           )
         );
       }
-      dispatch({
-        type: SET_ORDERS,
-        orders: loadedOrders,
-      });
+      dispatch({ type: SET_ORDERS, orders: loadedOrders });
     } catch (error) {
       throw error;
     }
@@ -46,20 +43,20 @@ export const addOrder = (cartItems, totalAmount) => {
     const response = await fetch(
       `https://rn-shoppingapp-8b23a-default-rtdb.europe-west1.firebasedatabase.app/orders/${userId}.json?auth=${token}`,
       {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           cartItems,
           totalAmount,
-          date: date.toISOString(),
-        }),
+          date: date.toISOString()
+        })
       }
     );
 
     if (!response.ok) {
-      throw new Error("Something went wrong!");
+      throw new Error('Something went wrong!');
     }
 
     const resData = await response.json();
@@ -70,8 +67,26 @@ export const addOrder = (cartItems, totalAmount) => {
         id: resData.name,
         items: cartItems,
         amount: totalAmount,
-        date: date,
-      },
+        date: date
+      }
     });
+
+    for (const cartItem of cartItems) {
+      const pushToken = cartItem.productPushToken;
+
+      fetch('https://exp.host/--/api/v2/push/send', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Accept-Encoding': 'gzip, deflate',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          to: pushToken,
+          title: 'Order was placed!',
+          body: cartItem.productTitle
+        })
+      });
+    }
   };
 };

@@ -1,24 +1,25 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   View,
   Text,
   FlatList,
   Button,
   StyleSheet,
-  ActivityIndicator,
-} from "react-native";
-import { useSelector, useDispatch } from "react-redux";
-import Colors from "../../constants/Colors";
-import CartItem from "../../components/shop/CartItem";
-import Cart from "../../components/UI/Cart";
-import * as cartActions from "../../store/actions/cart";
-import * as ordersActions from "../../store/actions/orders";
+  ActivityIndicator
+} from 'react-native';
+import { useSelector, useDispatch } from 'react-redux';
 
-const CartScreen = (props) => {
+import Colors from '../../constants/Colors';
+import CartItem from '../../components/shop/CartItem';
+import Card from '../../components/UI/Card';
+import * as cartActions from '../../store/actions/cart';
+import * as ordersActions from '../../store/actions/orders';
+
+const CartScreen = props => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const cartTotalAmount = useSelector((state) => state.cart.totalAmount);
-  const cartItems = useSelector((state) => {
+  const cartTotalAmount = useSelector(state => state.cart.totalAmount);
+  const cartItems = useSelector(state => {
     const transformedCartItems = [];
     for (const key in state.cart.items) {
       transformedCartItems.push({
@@ -27,13 +28,13 @@ const CartScreen = (props) => {
         productPrice: state.cart.items[key].productPrice,
         quantity: state.cart.items[key].quantity,
         sum: state.cart.items[key].sum,
+        productPushToken: state.cart.items[key].pushToken
       });
     }
     return transformedCartItems.sort((a, b) =>
       a.productId > b.productId ? 1 : -1
     );
   });
-
   const dispatch = useDispatch();
 
   const sendOrderHandler = async () => {
@@ -44,9 +45,9 @@ const CartScreen = (props) => {
 
   return (
     <View style={styles.screen}>
-      <Cart style={styles.summary}>
+      <Card style={styles.summary}>
         <Text style={styles.summaryText}>
-          Total:{" "}
+          Total:{' '}
           <Text style={styles.amount}>
             ${Math.round(cartTotalAmount.toFixed(2) * 100) / 100}
           </Text>
@@ -61,11 +62,11 @@ const CartScreen = (props) => {
             onPress={sendOrderHandler}
           />
         )}
-      </Cart>
+      </Card>
       <FlatList
         data={cartItems}
-        keyExtractor={(item) => item.productId}
-        renderItem={(itemData) => (
+        keyExtractor={item => item.productId}
+        renderItem={itemData => (
           <CartItem
             quantity={itemData.item.quantity}
             title={itemData.item.productTitle}
@@ -82,27 +83,27 @@ const CartScreen = (props) => {
 };
 
 export const screenOptions = {
-  headerTitle: "Your Cart",
+  headerTitle: 'Your Cart'
 };
 
 const styles = StyleSheet.create({
   screen: {
-    margin: 20,
+    margin: 20
   },
   summary: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 20,
-    padding: 10,
+    padding: 10
   },
   summaryText: {
-    fontFamily: "open-sans-bold",
-    fontSize: 18,
+    fontFamily: 'open-sans-bold',
+    fontSize: 18
   },
   amount: {
-    color: Colors.primary,
-  },
+    color: Colors.primary
+  }
 });
 
 export default CartScreen;
